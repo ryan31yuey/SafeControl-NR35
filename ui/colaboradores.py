@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from tkinter import ttk
 from database.database import Database
 
 
@@ -16,10 +17,10 @@ class Colaboradores(ctk.CTkFrame):
             text="Cadastro de Colaboradores",
             font=("Arial", 28, "bold")
         )
-        titulo.pack(pady=(40, 20))
+        titulo.pack(pady=(30, 15))
 
-        formulario = ctk.CTkFrame(self, width=500, height=350)
-        formulario.pack(pady=20)
+        formulario = ctk.CTkFrame(self, width=500, height=320)
+        formulario.pack(pady=10)
         formulario.pack_propagate(False)
 
         self.campo_nome = ctk.CTkEntry(
@@ -28,7 +29,7 @@ class Colaboradores(ctk.CTkFrame):
             width=400,
             height=40
         )
-        self.campo_nome.pack(pady=15)
+        self.campo_nome.pack(pady=12)
 
         self.campo_matricula = ctk.CTkEntry(
             formulario,
@@ -36,7 +37,7 @@ class Colaboradores(ctk.CTkFrame):
             width=400,
             height=40
         )
-        self.campo_matricula.pack(pady=15)
+        self.campo_matricula.pack(pady=12)
 
         self.campo_setor = ctk.CTkEntry(
             formulario,
@@ -44,7 +45,7 @@ class Colaboradores(ctk.CTkFrame):
             width=400,
             height=40
         )
-        self.campo_setor.pack(pady=15)
+        self.campo_setor.pack(pady=12)
 
         botao_salvar = ctk.CTkButton(
             formulario,
@@ -53,14 +54,34 @@ class Colaboradores(ctk.CTkFrame):
             height=40,
             command=self.salvar_colaborador
         )
-        botao_salvar.pack(pady=25)
+        botao_salvar.pack(pady=20)
 
-        self.lista = ctk.CTkTextbox(
+        self.campo_pesquisa = ctk.CTkEntry(
             self,
+            placeholder_text="Pesquisar colaborador...",
             width=700,
-            height=180
+            height=40
         )
-        self.lista.pack(pady=20)
+        self.campo_pesquisa.pack(pady=(10, 5))
+
+        self.tabela = ttk.Treeview(
+            self,
+            columns=("id", "nome", "registro", "setor"),
+            show="headings",
+            height=8
+        )
+
+        self.tabela.heading("id", text="ID")
+        self.tabela.heading("nome", text="Nome")
+        self.tabela.heading("registro", text="Registro")
+        self.tabela.heading("setor", text="Setor")
+
+        self.tabela.column("id", width=60, anchor="center")
+        self.tabela.column("nome", width=260)
+        self.tabela.column("registro", width=150, anchor="center")
+        self.tabela.column("setor", width=200)
+
+        self.tabela.pack(pady=20)
 
         self.atualizar_lista()
 
@@ -90,13 +111,19 @@ class Colaboradores(ctk.CTkFrame):
         self.atualizar_lista()
 
     def atualizar_lista(self):
-        self.lista.delete("1.0", "end")
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
 
         colaboradores = self.banco.listar_colaboradores()
 
-        self.lista.insert("end", "ID | Nome | Registro | Setor\n")
-        self.lista.insert("end", "-" * 55 + "\n")
-
         for colaborador in colaboradores:
-            texto = f"{colaborador[0]} | {colaborador[1]} | {colaborador[2]} | {colaborador[3]}\n"
-            self.lista.insert("end", texto)
+            self.tabela.insert(
+                "",
+                "end",
+                values=(
+                    colaborador[0],
+                    colaborador[1],
+                    colaborador[2],
+                    colaborador[3]
+                )
+            )
