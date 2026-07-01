@@ -31,7 +31,7 @@ class Database:
     def listar_colaboradores(self):
         self.cursor.execute("""
             SELECT * FROM colaboradores
-            ORDER BY nome
+            ORDER BY id ASC
         """)
 
         return self.cursor.fetchall()
