@@ -49,14 +49,37 @@ class Colaboradores(ctk.CTkFrame):
         )
         self.campo_setor.pack(pady=12)
 
-        botao_salvar = ctk.CTkButton(
+        frame_botoes = ctk.CTkFrame(
             formulario,
-            text="Salvar Colaborador",
-            width=250,
-            height=40,
+            fg_color="transparent"
+        )
+        frame_botoes.pack(pady=20)
+
+        botao_salvar = ctk.CTkButton(
+            frame_botoes,
+            text="💾 Salvar",
+            width=120,
             command=self.salvar_colaborador
         )
-        botao_salvar.pack(pady=20)
+        botao_salvar.pack(side="left", padx=5)
+
+        botao_atualizar = ctk.CTkButton(
+            frame_botoes,
+            text="✏ Atualizar",
+            width=120,
+            command=self.atualizar_colaborador
+        )
+        botao_atualizar.pack(side="left", padx=5)
+
+        botao_excluir = ctk.CTkButton(
+            frame_botoes,
+            text="🗑 Excluir",
+            width=120,
+            fg_color="#b71c1c",
+            hover_color="#8e0000",
+            command=self.excluir_colaborador
+        )
+        botao_excluir.pack(side="left", padx=5)
 
         self.campo_pesquisa = ctk.CTkEntry(
             self,
@@ -85,7 +108,6 @@ class Colaboradores(ctk.CTkFrame):
         self.tabela.column("setor", width=200)
 
         self.tabela.pack(pady=20)
-
         self.tabela.bind("<<TreeviewSelect>>", self.selecionar_colaborador)
 
         self.atualizar_lista()
@@ -96,18 +118,12 @@ class Colaboradores(ctk.CTkFrame):
         setor = self.campo_setor.get()
 
         if nome == "" or registro == "" or setor == "":
-            messagebox.showwarning(
-                "Atenção",
-                "Preencha todos os campos."
-            )
+            messagebox.showwarning("Atenção", "Preencha todos os campos.")
             return
 
         self.banco.cadastrar_colaborador(nome, registro, setor)
 
-        messagebox.showinfo(
-            "Sucesso",
-            "Colaborador cadastrado com sucesso!"
-        )
+        messagebox.showinfo("Sucesso", "Colaborador cadastrado com sucesso!")
 
         self.limpar_campos()
         self.atualizar_lista()
@@ -173,3 +189,33 @@ class Colaboradores(ctk.CTkFrame):
         self.campo_nome.delete(0, "end")
         self.campo_matricula.delete(0, "end")
         self.campo_setor.delete(0, "end")
+
+    def atualizar_colaborador(self):
+        messagebox.showinfo(
+            "Em desenvolvimento",
+            "Função Atualizar será implementada na próxima etapa."
+        )
+
+    def excluir_colaborador(self):
+        if self.id_selecionado is None:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um colaborador para excluir."
+            )
+            return
+
+        confirmar = messagebox.askyesno(
+            "Confirmar exclusão",
+            "Deseja realmente excluir este colaborador?"
+        )
+
+        if confirmar:
+            self.banco.excluir_colaborador(self.id_selecionado)
+
+            messagebox.showinfo(
+                "Sucesso",
+                "Colaborador excluído com sucesso!"
+            )
+
+            self.limpar_campos()
+            self.atualizar_lista()

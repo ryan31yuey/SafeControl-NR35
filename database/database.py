@@ -46,3 +46,11 @@ class Database:
         """, (f"%{termo}%", f"%{termo}%", f"%{termo}%"))
 
         return self.cursor.fetchall()
+
+    def excluir_colaborador(self, id_colaborador):
+        self.cursor.execute("""
+            DELETE FROM colaboradores
+            WHERE id = ?
+        """, (id_colaborador,))
+
+        self.conexao.commit()
