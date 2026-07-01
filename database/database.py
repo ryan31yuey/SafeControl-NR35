@@ -35,3 +35,14 @@ class Database:
         """)
 
         return self.cursor.fetchall()
+
+    def pesquisar_colaboradores(self, termo):
+        self.cursor.execute("""
+            SELECT * FROM colaboradores
+            WHERE nome LIKE ?
+               OR registro LIKE ?
+               OR setor LIKE ?
+            ORDER BY id ASC
+        """, (f"%{termo}%", f"%{termo}%", f"%{termo}%"))
+
+        return self.cursor.fetchall()

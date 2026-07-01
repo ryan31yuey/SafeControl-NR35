@@ -10,6 +10,8 @@ class Colaboradores(ctk.CTkFrame):
         super().__init__(master)
 
         self.banco = Database()
+        self.id_selecionado = None
+
         self.pack(fill="both", expand=True)
 
         titulo = ctk.CTkLabel(
@@ -63,6 +65,7 @@ class Colaboradores(ctk.CTkFrame):
             height=40
         )
         self.campo_pesquisa.pack(pady=(10, 5))
+        self.campo_pesquisa.bind("<KeyRelease>", self.pesquisar)
 
         self.tabela = ttk.Treeview(
             self,
@@ -82,6 +85,8 @@ class Colaboradores(ctk.CTkFrame):
         self.tabela.column("setor", width=200)
 
         self.tabela.pack(pady=20)
+
+        self.tabela.bind("<<TreeviewSelect>>", self.selecionar_colaborador)
 
         self.atualizar_lista()
 
@@ -104,10 +109,7 @@ class Colaboradores(ctk.CTkFrame):
             "Colaborador cadastrado com sucesso!"
         )
 
-        self.campo_nome.delete(0, "end")
-        self.campo_matricula.delete(0, "end")
-        self.campo_setor.delete(0, "end")
-
+        self.limpar_campos()
         self.atualizar_lista()
 
     def atualizar_lista(self):
@@ -127,3 +129,47 @@ class Colaboradores(ctk.CTkFrame):
                     colaborador[3]
                 )
             )
+
+    def pesquisar(self, evento):
+        termo = self.campo_pesquisa.get()
+
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
+
+        colaboradores = self.banco.pesquisar_colaboradores(termo)
+
+        for colaborador in colaboradores:
+            self.tabela.insert(
+                "",
+                "end",
+                values=(
+                    colaborador[0],
+                    colaborador[1],
+                    colaborador[2],
+                    colaborador[3]
+                )
+            )
+
+    def selecionar_colaborador(self, evento):
+        item_selecionado = self.tabela.selection()
+
+        if not item_selecionado:
+            return
+
+        dados = self.tabela.item(item_selecionado[0], "values")
+
+        self.id_selecionado = dados[0]
+
+        self.campo_nome.delete(0, "end")
+        self.campo_matricula.delete(0, "end")
+        self.campo_setor.delete(0, "end")
+
+        self.campo_nome.insert(0, dados[1])
+        self.campo_matricula.insert(0, dados[2])
+        self.campo_setor.insert(0, dados[3])
+
+    def limpar_campos(self):
+        self.id_selecionado = None
+        self.campo_nome.delete(0, "end")
+        self.campo_matricula.delete(0, "end")
+        self.campo_setor.delete(0, "end")
