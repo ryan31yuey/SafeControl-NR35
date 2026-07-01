@@ -55,31 +55,28 @@ class Colaboradores(ctk.CTkFrame):
         )
         frame_botoes.pack(pady=20)
 
-        botao_salvar = ctk.CTkButton(
+        ctk.CTkButton(
             frame_botoes,
             text="💾 Salvar",
             width=120,
             command=self.salvar_colaborador
-        )
-        botao_salvar.pack(side="left", padx=5)
+        ).pack(side="left", padx=5)
 
-        botao_atualizar = ctk.CTkButton(
+        ctk.CTkButton(
             frame_botoes,
             text="✏ Atualizar",
             width=120,
             command=self.atualizar_colaborador
-        )
-        botao_atualizar.pack(side="left", padx=5)
+        ).pack(side="left", padx=5)
 
-        botao_excluir = ctk.CTkButton(
+        ctk.CTkButton(
             frame_botoes,
             text="🗑 Excluir",
             width=120,
             fg_color="#b71c1c",
             hover_color="#8e0000",
             command=self.excluir_colaborador
-        )
-        botao_excluir.pack(side="left", padx=5)
+        ).pack(side="left", padx=5)
 
         self.campo_pesquisa = ctk.CTkEntry(
             self,
@@ -118,17 +115,85 @@ class Colaboradores(ctk.CTkFrame):
         setor = self.campo_setor.get()
 
         if nome == "" or registro == "" or setor == "":
-            messagebox.showwarning("Atenção", "Preencha todos os campos.")
+            messagebox.showwarning(
+                "Atenção",
+                "Preencha todos os campos."
+            )
             return
 
         self.banco.cadastrar_colaborador(nome, registro, setor)
 
-        messagebox.showinfo("Sucesso", "Colaborador cadastrado com sucesso!")
+        messagebox.showinfo(
+            "Sucesso",
+            "Colaborador cadastrado com sucesso!"
+        )
 
         self.limpar_campos()
         self.atualizar_lista()
 
+    def atualizar_colaborador(self):
+
+        if self.id_selecionado is None:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um colaborador."
+            )
+            return
+
+        nome = self.campo_nome.get()
+        registro = self.campo_matricula.get()
+        setor = self.campo_setor.get()
+
+        if nome == "" or registro == "" or setor == "":
+            messagebox.showwarning(
+                "Atenção",
+                "Preencha todos os campos."
+            )
+            return
+
+        self.banco.atualizar_colaborador(
+            self.id_selecionado,
+            nome,
+            registro,
+            setor
+        )
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Colaborador atualizado com sucesso!"
+        )
+
+        self.limpar_campos()
+        self.atualizar_lista()
+
+    def excluir_colaborador(self):
+
+        if self.id_selecionado is None:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um colaborador."
+            )
+            return
+
+        confirmar = messagebox.askyesno(
+            "Excluir",
+            "Deseja realmente excluir este colaborador?"
+        )
+
+        if confirmar:
+
+            self.banco.excluir_colaborador(self.id_selecionado)
+
+            messagebox.showinfo(
+                "Sucesso",
+                "Colaborador excluído."
+            )
+
+            self.limpar_campos()
+            self.atualizar_lista()
+
     def atualizar_lista(self):
+
         for item in self.tabela.get_children():
             self.tabela.delete(item)
 
@@ -138,15 +203,11 @@ class Colaboradores(ctk.CTkFrame):
             self.tabela.insert(
                 "",
                 "end",
-                values=(
-                    colaborador[0],
-                    colaborador[1],
-                    colaborador[2],
-                    colaborador[3]
-                )
+                values=colaborador
             )
 
     def pesquisar(self, evento):
+
         termo = self.campo_pesquisa.get()
 
         for item in self.tabela.get_children():
@@ -158,21 +219,20 @@ class Colaboradores(ctk.CTkFrame):
             self.tabela.insert(
                 "",
                 "end",
-                values=(
-                    colaborador[0],
-                    colaborador[1],
-                    colaborador[2],
-                    colaborador[3]
-                )
+                values=colaborador
             )
 
     def selecionar_colaborador(self, evento):
-        item_selecionado = self.tabela.selection()
 
-        if not item_selecionado:
+        selecionado = self.tabela.selection()
+
+        if not selecionado:
             return
 
-        dados = self.tabela.item(item_selecionado[0], "values")
+        dados = self.tabela.item(
+            selecionado[0],
+            "values"
+        )
 
         self.id_selecionado = dados[0]
 
@@ -185,37 +245,9 @@ class Colaboradores(ctk.CTkFrame):
         self.campo_setor.insert(0, dados[3])
 
     def limpar_campos(self):
+
         self.id_selecionado = None
+
         self.campo_nome.delete(0, "end")
         self.campo_matricula.delete(0, "end")
         self.campo_setor.delete(0, "end")
-
-    def atualizar_colaborador(self):
-        messagebox.showinfo(
-            "Em desenvolvimento",
-            "Função Atualizar será implementada na próxima etapa."
-        )
-
-    def excluir_colaborador(self):
-        if self.id_selecionado is None:
-            messagebox.showwarning(
-                "Atenção",
-                "Selecione um colaborador para excluir."
-            )
-            return
-
-        confirmar = messagebox.askyesno(
-            "Confirmar exclusão",
-            "Deseja realmente excluir este colaborador?"
-        )
-
-        if confirmar:
-            self.banco.excluir_colaborador(self.id_selecionado)
-
-            messagebox.showinfo(
-                "Sucesso",
-                "Colaborador excluído com sucesso!"
-            )
-
-            self.limpar_campos()
-            self.atualizar_lista()

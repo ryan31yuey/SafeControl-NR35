@@ -54,3 +54,12 @@ class Database:
         """, (id_colaborador,))
 
         self.conexao.commit()
+
+    def atualizar_colaborador(self, id_colaborador, nome, registro, setor):
+        self.cursor.execute("""
+            UPDATE colaboradores
+            SET nome = ?, registro = ?, setor = ?
+            WHERE id = ?
+        """, (nome, registro, setor, id_colaborador))
+
+        self.conexao.commit()
