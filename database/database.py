@@ -32,16 +32,11 @@ class Database:
 
         self.conexao.commit()
 
-    # ==========================
-    # COLABORADORES
-    # ==========================
-
     def cadastrar_colaborador(self, nome, registro, setor):
         self.cursor.execute("""
             INSERT INTO colaboradores (nome, registro, setor)
             VALUES (?, ?, ?)
         """, (nome, registro, setor))
-
         self.conexao.commit()
 
     def listar_colaboradores(self):
@@ -50,7 +45,6 @@ class Database:
             FROM colaboradores
             ORDER BY id ASC
         """)
-
         return self.cursor.fetchall()
 
     def pesquisar_colaboradores(self, termo):
@@ -66,7 +60,6 @@ class Database:
             f"%{termo}%",
             f"%{termo}%"
         ))
-
         return self.cursor.fetchall()
 
     def atualizar_colaborador(self, id_colaborador, nome, registro, setor):
@@ -74,13 +67,7 @@ class Database:
             UPDATE colaboradores
             SET nome = ?, registro = ?, setor = ?
             WHERE id = ?
-        """, (
-            nome,
-            registro,
-            setor,
-            id_colaborador
-        ))
-
+        """, (nome, registro, setor, id_colaborador))
         self.conexao.commit()
 
     def excluir_colaborador(self, id_colaborador):
@@ -88,12 +75,7 @@ class Database:
             DELETE FROM colaboradores
             WHERE id = ?
         """, (id_colaborador,))
-
         self.conexao.commit()
-
-    # ==========================
-    # EQUIPAMENTOS
-    # ==========================
 
     def cadastrar_equipamento(
         self,
@@ -122,7 +104,6 @@ class Database:
             validade,
             observacoes
         ))
-
         self.conexao.commit()
 
     def listar_equipamentos(self):
@@ -137,5 +118,59 @@ class Database:
             FROM equipamentos
             ORDER BY id ASC
         """)
-
         return self.cursor.fetchall()
+
+    def pesquisar_equipamentos(self, termo):
+        self.cursor.execute("""
+            SELECT
+                id,
+                nome,
+                ca,
+                quantidade,
+                fabricante,
+                validade
+            FROM equipamentos
+            WHERE nome LIKE ?
+               OR ca LIKE ?
+               OR fabricante LIKE ?
+               OR validade LIKE ?
+            ORDER BY id ASC
+        """, (
+            f"%{termo}%",
+            f"%{termo}%",
+            f"%{termo}%",
+            f"%{termo}%"
+        ))
+        return self.cursor.fetchall()
+
+    def atualizar_equipamento(
+        self,
+        id_equipamento,
+        nome,
+        ca,
+        quantidade,
+        fabricante,
+        validade,
+        observacoes
+    ):
+        self.cursor.execute("""
+            UPDATE equipamentos
+            SET
+                nome = ?,
+                ca = ?,
+                quantidade = ?,
+                fabricante = ?,
+                validade = ?,
+                observacoes = ?
+            WHERE id = ?
+        """, (
+            nome,
+            ca,
+            quantidade,
+            fabricante,
+            validade,
+            observacoes,
+            id_equipamento
+        ))
+
+        self.conexao.commit()

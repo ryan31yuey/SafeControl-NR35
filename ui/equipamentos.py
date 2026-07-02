@@ -21,7 +21,11 @@ class Equipamentos(ctk.CTkFrame):
         )
         titulo.pack(pady=(25, 10))
 
-        formulario = ctk.CTkFrame(self, width=700, height=410)
+        formulario = ctk.CTkFrame(
+            self,
+            width=700,
+            height=410
+        )
         formulario.pack(pady=10)
         formulario.pack_propagate(False)
 
@@ -115,6 +119,7 @@ class Equipamentos(ctk.CTkFrame):
             height=40
         )
         self.campo_pesquisa.pack(pady=(10, 5))
+        self.campo_pesquisa.bind("<KeyRelease>", self.pesquisar)
 
         self.tabela = ttk.Treeview(
             self,
@@ -138,6 +143,7 @@ class Equipamentos(ctk.CTkFrame):
         self.tabela.column("validade", width=140, anchor="center")
 
         self.tabela.pack(pady=15)
+        self.tabela.bind("<<TreeviewSelect>>", self.selecionar_equipamento)
 
         self.atualizar_lista()
 
@@ -195,6 +201,7 @@ class Equipamentos(ctk.CTkFrame):
 
     def limpar_campos(self):
         self.id_selecionado = None
+
         self.campo_nome.delete(0, "end")
         self.campo_ca.delete(0, "end")
         self.campo_quantidade.delete(0, "end")
@@ -202,14 +209,93 @@ class Equipamentos(ctk.CTkFrame):
         self.campo_validade.delete(0, "end")
         self.campo_observacoes.delete(0, "end")
 
+    def selecionar_equipamento(self, evento):
+        item_selecionado = self.tabela.selection()
+
+        if not item_selecionado:
+            return
+
+        dados = self.tabela.item(item_selecionado[0], "values")
+
+        self.id_selecionado = dados[0]
+
+        self.campo_nome.delete(0, "end")
+        self.campo_ca.delete(0, "end")
+        self.campo_quantidade.delete(0, "end")
+        self.campo_fabricante.delete(0, "end")
+        self.campo_validade.delete(0, "end")
+        self.campo_observacoes.delete(0, "end")
+
+        self.campo_nome.insert(0, dados[1])
+        self.campo_ca.insert(0, dados[2])
+        self.campo_quantidade.insert(0, dados[3])
+        self.campo_fabricante.insert(0, dados[4])
+        self.campo_validade.insert(0, dados[5])
+
     def atualizar_equipamento(self):
-        messagebox.showinfo(
-            "Em desenvolvimento",
-            "Função Atualizar Equipamento será implementada depois."
+        if self.id_selecionado is None:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um equipamento."
+            )
+            return
+
+        nome = self.campo_nome.get()
+        ca = self.campo_ca.get()
+        quantidade = self.campo_quantidade.get()
+        fabricante = self.campo_fabricante.get()
+        validade = self.campo_validade.get()
+        observacoes = self.campo_observacoes.get()
+
+        if nome == "" or ca == "" or quantidade == "" or fabricante == "" or validade == "":
+            messagebox.showwarning(
+                "Atenção",
+                "Preencha todos os campos obrigatórios."
+            )
+            return
+
+        if not quantidade.isdigit():
+            messagebox.showwarning(
+                "Atenção",
+                "A quantidade deve conter apenas números."
+            )
+            return
+
+        self.banco.atualizar_equipamento(
+            self.id_selecionado,
+            nome,
+            ca,
+            int(quantidade),
+            fabricante,
+            validade,
+            observacoes
         )
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Equipamento atualizado com sucesso!"
+        )
+
+        self.limpar_campos()
+        self.atualizar_lista()
 
     def excluir_equipamento(self):
         messagebox.showinfo(
             "Em desenvolvimento",
             "Função Excluir Equipamento será implementada depois."
         )
+
+    def pesquisar(self, evento):
+        termo = self.campo_pesquisa.get()
+
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
+
+        equipamentos = self.banco.pesquisar_equipamentos(termo)
+
+        for equipamento in equipamentos:
+            self.tabela.insert(
+                "",
+                "end",
+                values=equipamento
+            )
