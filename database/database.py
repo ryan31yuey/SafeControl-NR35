@@ -19,6 +19,18 @@ class Database:
         """)
 
         self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS movimentacoes(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                colaborador TEXT NOT NULL,
+                equipamento TEXT NOT NULL,
+                quantidade INTEGER NOT NULL,
+                tipo TEXT NOT NULL,
+                data TEXT NOT NULL,
+                hora TEXT NOT NULL
+            )
+        """)
+
+        self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS equipamentos(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL,
@@ -182,3 +194,21 @@ class Database:
         """, (id_equipamento,))
 
         self.conexao.commit()
+
+    def nomes_colaboradores(self):
+        self.cursor.execute("""
+            SELECT nome
+            FROM colaboradores
+            ORDER BY nome
+        """)
+
+        return [linha[0] for linha in self.cursor.fetchall()]
+
+    def nomes_equipamentos(self):
+        self.cursor.execute("""
+            SELECT nome
+            FROM equipamentos
+            ORDER BY nome
+        """)
+
+        return [linha[0] for linha in self.cursor.fetchall()]

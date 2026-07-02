@@ -2,6 +2,7 @@ import customtkinter as ctk
 from ui.dashboard import Dashboard
 from ui.colaboradores import Colaboradores
 from ui.equipamentos import Equipamentos
+from ui.estoque import Estoque
 
 
 ctk.set_appearance_mode("dark")
@@ -74,7 +75,7 @@ class SistemaNR35:
             ("🏠 Dashboard", lambda: self.trocar_tela(Dashboard)),
             ("👷 Colaboradores", lambda: self.trocar_tela(Colaboradores)),
             ("🦺 Equipamentos", lambda: self.trocar_tela(Equipamentos)),
-            ("📦 Estoque", lambda: print("Estoque")),
+            ("📦 Estoque", lambda: self.trocar_tela(Estoque)),
             ("📋 Histórico", lambda: print("Histórico")),
             ("📄 Relatórios", lambda: print("Relatórios")),
             ("⚙️ Configurações", lambda: print("Configurações")),
