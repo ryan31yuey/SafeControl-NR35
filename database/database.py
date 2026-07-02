@@ -174,3 +174,11 @@ class Database:
         ))
 
         self.conexao.commit()
+
+    def excluir_equipamento(self, id_equipamento):
+        self.cursor.execute("""
+            DELETE FROM equipamentos
+            WHERE id = ?
+        """, (id_equipamento,))
+
+        self.conexao.commit()

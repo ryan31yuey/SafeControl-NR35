@@ -280,10 +280,28 @@ class Equipamentos(ctk.CTkFrame):
         self.atualizar_lista()
 
     def excluir_equipamento(self):
-        messagebox.showinfo(
-            "Em desenvolvimento",
-            "Função Excluir Equipamento será implementada depois."
+        if self.id_selecionado is None:
+            messagebox.showwarning(
+                "Atenção",
+                "Selecione um equipamento."
+            )
+            return
+
+        confirmar = messagebox.askyesno(
+            "Excluir",
+            "Deseja realmente excluir este equipamento?"
         )
+
+        if confirmar:
+            self.banco.excluir_equipamento(self.id_selecionado)
+
+            messagebox.showinfo(
+                "Sucesso",
+                "Equipamento excluído com sucesso!"
+            )
+
+            self.limpar_campos()
+            self.atualizar_lista()
 
     def pesquisar(self, evento):
         termo = self.campo_pesquisa.get()
