@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from tkinter import ttk
 from database.database import Database
+from datetime import datetime
 
 
 class Equipamentos(ctk.CTkFrame):

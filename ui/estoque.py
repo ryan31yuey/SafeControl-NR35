@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from database.database import Database
+from datetime import datetime
 
 
 class Estoque(ctk.CTkFrame):
@@ -95,6 +96,20 @@ class Estoque(ctk.CTkFrame):
 
         return colaborador, equipamento, int(quantidade)
 
+    def registrar_movimentacao(self, colaborador, equipamento, quantidade, tipo):
+        agora = datetime.now()
+        data = agora.strftime("%d/%m/%Y")
+        hora = agora.strftime("%H:%M:%S")
+
+        self.banco.registrar_movimentacao(
+            colaborador,
+            equipamento,
+            quantidade,
+            tipo,
+            data,
+            hora
+        )
+
     def retirar(self):
         dados = self.validar_campos()
 
@@ -108,10 +123,7 @@ class Estoque(ctk.CTkFrame):
         )
 
         if quantidade_atual is None:
-            messagebox.showerror(
-                "Erro",
-                "Equipamento não encontrado."
-            )
+            messagebox.showerror("Erro", "Equipamento não encontrado.")
             return
 
         if quantidade > quantidade_atual:
@@ -128,10 +140,19 @@ class Estoque(ctk.CTkFrame):
             nova_quantidade
         )
 
+        self.registrar_movimentacao(
+            colaborador,
+            equipamento,
+            quantidade,
+            "Retirada"
+        )
+
         messagebox.showinfo(
             "Sucesso",
             f"Retirada realizada!\n\nNovo estoque: {nova_quantidade}"
         )
+
+        self.campo_quantidade.delete(0, "end")
 
     def devolver(self):
         dados = self.validar_campos()
@@ -146,10 +167,7 @@ class Estoque(ctk.CTkFrame):
         )
 
         if quantidade_atual is None:
-            messagebox.showerror(
-                "Erro",
-                "Equipamento não encontrado."
-            )
+            messagebox.showerror("Erro", "Equipamento não encontrado.")
             return
 
         nova_quantidade = quantidade_atual + quantidade
@@ -159,7 +177,16 @@ class Estoque(ctk.CTkFrame):
             nova_quantidade
         )
 
+        self.registrar_movimentacao(
+            colaborador,
+            equipamento,
+            quantidade,
+            "Devolução"
+        )
+
         messagebox.showinfo(
             "Sucesso",
             f"Devolução realizada!\n\nNovo estoque: {nova_quantidade}"
         )
+
+        self.campo_quantidade.delete(0, "end")

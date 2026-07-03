@@ -238,3 +238,33 @@ class Database:
             return None
 
         return resultado[0]
+
+    def registrar_movimentacao(
+        self,
+        colaborador,
+        equipamento,
+        quantidade,
+        tipo,
+        data,
+        hora
+    ):
+        self.cursor.execute("""
+            INSERT INTO movimentacoes(
+                colaborador,
+                equipamento,
+                quantidade,
+                tipo,
+                data,
+                hora
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            colaborador,
+            equipamento,
+            quantidade,
+            tipo,
+            data,
+            hora
+        ))
+
+        self.conexao.commit()
