@@ -103,9 +103,34 @@ class Estoque(ctk.CTkFrame):
 
         colaborador, equipamento, quantidade = dados
 
+        quantidade_atual = self.banco.buscar_quantidade_equipamento(
+            equipamento
+        )
+
+        if quantidade_atual is None:
+            messagebox.showerror(
+                "Erro",
+                "Equipamento não encontrado."
+            )
+            return
+
+        if quantidade > quantidade_atual:
+            messagebox.showwarning(
+                "Estoque insuficiente",
+                f"Existem apenas {quantidade_atual} unidade(s) disponíveis."
+            )
+            return
+
+        nova_quantidade = quantidade_atual - quantidade
+
+        self.banco.alterar_quantidade(
+            equipamento,
+            nova_quantidade
+        )
+
         messagebox.showinfo(
-            "Retirada",
-            f"{colaborador} retirou {quantidade} unidade(s) de {equipamento}."
+            "Sucesso",
+            f"Retirada realizada!\n\nNovo estoque: {nova_quantidade}"
         )
 
     def devolver(self):

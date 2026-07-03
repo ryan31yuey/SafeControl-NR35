@@ -212,3 +212,29 @@ class Database:
         """)
 
         return [linha[0] for linha in self.cursor.fetchall()]
+
+    def alterar_quantidade(self, nome_equipamento, nova_quantidade):
+        self.cursor.execute("""
+            UPDATE equipamentos
+            SET quantidade = ?
+            WHERE nome = ?
+        """, (
+            nova_quantidade,
+            nome_equipamento
+        ))
+
+        self.conexao.commit()
+
+    def buscar_quantidade_equipamento(self, nome_equipamento):
+        self.cursor.execute("""
+            SELECT quantidade
+            FROM equipamentos
+            WHERE nome = ?
+        """, (nome_equipamento,))
+
+        resultado = self.cursor.fetchone()
+
+        if resultado is None:
+            return None
+
+        return resultado[0]
