@@ -268,3 +268,18 @@ class Database:
         ))
 
         self.conexao.commit()
+
+    def listar_movimentacoes(self):
+        self.cursor.execute("""
+            SELECT
+                data,
+                hora,
+                colaborador,
+                equipamento,
+                tipo,
+                quantidade
+            FROM movimentacoes
+            ORDER BY id DESC
+        """)
+
+        return self.cursor.fetchall()
