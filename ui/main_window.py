@@ -4,6 +4,7 @@ from ui.colaboradores import Colaboradores
 from ui.equipamentos import Equipamentos
 from ui.estoque import Estoque
 from ui.historico import Historico
+from ui.relatorios import Relatorios
 
 
 ctk.set_appearance_mode("dark")
@@ -78,7 +79,7 @@ class SistemaNR35:
             ("🦺 Equipamentos", lambda: self.trocar_tela(Equipamentos)),
             ("📦 Estoque", lambda: self.trocar_tela(Estoque)),
             ("📋 Histórico", lambda: self.trocar_tela(Historico)),
-            ("📄 Relatórios", lambda: print("Relatórios")),
+           ("📄 Relatórios", lambda: self.trocar_tela(Relatorios)),
             ("⚙️ Configurações", lambda: print("Configurações")),
         ]
 
