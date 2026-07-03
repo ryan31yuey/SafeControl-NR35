@@ -1,6 +1,9 @@
 import customtkinter as ctk
 from tkinter import messagebox
 
+from assets.theme.theme import *
+from ui.components import BotaoPrimario
+
 
 class Login(ctk.CTkFrame):
 
@@ -8,59 +11,96 @@ class Login(ctk.CTkFrame):
         super().__init__(master)
 
         self.abrir_sistema = abrir_sistema
+
         self.pack(fill="both", expand=True)
 
-        caixa = ctk.CTkFrame(self, width=420, height=430, corner_radius=20)
+        self.configure(fg_color=BACKGROUND)
+
+        caixa = ctk.CTkFrame(
+            self,
+            width=460,
+            height=520,
+            corner_radius=18,
+            fg_color=CARD
+        )
         caixa.place(relx=0.5, rely=0.5, anchor="center")
         caixa.pack_propagate(False)
 
+        logo = ctk.CTkLabel(
+            caixa,
+            text="🛡",
+            font=("Segoe UI Emoji", 55)
+        )
+        logo.pack(pady=(25, 5))
+
         titulo = ctk.CTkLabel(
             caixa,
-            text="🦺 SafeControl NR-35",
-            font=("Arial", 28, "bold")
+            text="SafeControl",
+            font=FONT_TITLE,
+            text_color=PRIMARY
         )
-        titulo.pack(pady=(45, 10))
+        titulo.pack()
 
         subtitulo = ctk.CTkLabel(
             caixa,
-            text="Controle Inteligente de EPIs",
-            font=("Arial", 15)
+            text="Gestão Inteligente de EPIs",
+            font=FONT_SUBTITLE,
+            text_color=TEXT_SECONDARY
         )
-        subtitulo.pack(pady=(0, 30))
+        subtitulo.pack(pady=(0, 35))
 
         self.campo_usuario = ctk.CTkEntry(
             caixa,
-            placeholder_text="Usuário",
-            width=300,
-            height=42
+            placeholder_text="👤 Usuário",
+            width=330,
+            height=45,
+            corner_radius=10
         )
         self.campo_usuario.pack(pady=10)
 
         self.campo_senha = ctk.CTkEntry(
             caixa,
-            placeholder_text="Senha",
-            width=300,
-            height=42,
-            show="*"
+            placeholder_text="🔒 Senha",
+            width=330,
+            height=45,
+            show="*",
+            corner_radius=10
         )
         self.campo_senha.pack(pady=10)
 
-        botao_entrar = ctk.CTkButton(
+        self.lembrar = ctk.CTkCheckBox(
+            caixa,
+            text="Lembrar usuário",
+            font=FONT_TEXT
+        )
+        self.lembrar.pack(
+            anchor="w",
+            padx=65,
+            pady=(5, 20)
+        )
+
+        botao = BotaoPrimario(
             caixa,
             text="ENTRAR",
-            width=300,
-            height=45,
-            font=("Arial", 15, "bold"),
             command=self.validar_login
         )
-        botao_entrar.pack(pady=25)
+        botao.pack()
 
-        rodape = ctk.CTkLabel(
+        versao = ctk.CTkLabel(
             caixa,
-            text="Versão 1.0 • Desenvolvido por Ryan Yuey",
-            font=("Arial", 11)
+            text="Versão 1.0",
+            font=FONT_SMALL,
+            text_color=TEXT_SECONDARY
         )
-        rodape.pack(pady=(10, 0))
+        versao.pack(pady=(40, 0))
+
+        autor = ctk.CTkLabel(
+            caixa,
+            text="Desenvolvido por Ryan Yuey",
+            font=FONT_SMALL,
+            text_color=TEXT_SECONDARY
+        )
+        autor.pack()
 
     def validar_login(self):
         usuario = self.campo_usuario.get()

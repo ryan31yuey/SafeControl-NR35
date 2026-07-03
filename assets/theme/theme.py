@@ -1,0 +1,26 @@
+# ===========================
+# SAFE CONTROL THEME
+# ===========================
+
+PRIMARY = "#1565C0"
+PRIMARY_HOVER = "#0D47A1"
+
+SUCCESS = "#16A34A"
+WARNING = "#F59E0B"
+DANGER = "#DC2626"
+
+BACKGROUND = "#1E1E1E"
+CARD = "#2B2B2B"
+CARD_DARK = "#252525"
+
+TEXT = "#FFFFFF"
+TEXT_SECONDARY = "#BEBEBE"
+
+BORDER = "#3A3A3A"
+
+RADIUS = 15
+
+FONT_TITLE = ("Segoe UI", 30, "bold")
+FONT_SUBTITLE = ("Segoe UI", 18)
+FONT_TEXT = ("Segoe UI", 14)
+FONT_SMALL = ("Segoe UI", 12)
