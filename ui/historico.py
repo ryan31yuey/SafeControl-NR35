@@ -9,6 +9,7 @@ class Historico(ctk.CTkFrame):
         super().__init__(master)
 
         self.banco = Database()
+
         self.pack(fill="both", expand=True)
 
         titulo = ctk.CTkLabel(
@@ -18,9 +19,25 @@ class Historico(ctk.CTkFrame):
         )
         titulo.pack(pady=(40, 20))
 
+        self.campo_pesquisa = ctk.CTkEntry(
+            self,
+            placeholder_text="Pesquisar por colaborador, equipamento, tipo ou data...",
+            width=850,
+            height=40
+        )
+        self.campo_pesquisa.pack(pady=(10, 5))
+        self.campo_pesquisa.bind("<KeyRelease>", self.pesquisar)
+
         self.tabela = ttk.Treeview(
             self,
-            columns=("data", "hora", "colaborador", "equipamento", "tipo", "quantidade"),
+            columns=(
+                "data",
+                "hora",
+                "colaborador",
+                "equipamento",
+                "tipo",
+                "quantidade"
+            ),
             show="headings",
             height=18
         )
@@ -48,6 +65,21 @@ class Historico(ctk.CTkFrame):
             self.tabela.delete(item)
 
         movimentacoes = self.banco.listar_movimentacoes()
+
+        for movimentacao in movimentacoes:
+            self.tabela.insert(
+                "",
+                "end",
+                values=movimentacao
+            )
+
+    def pesquisar(self, evento):
+        termo = self.campo_pesquisa.get()
+
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
+
+        movimentacoes = self.banco.pesquisar_movimentacoes(termo)
 
         for movimentacao in movimentacoes:
             self.tabela.insert(

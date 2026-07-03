@@ -283,3 +283,78 @@ class Database:
         """)
 
         return self.cursor.fetchall()
+
+    def total_colaboradores(self):
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM colaboradores
+        """)
+
+        return self.cursor.fetchone()[0]
+
+
+    def total_equipamentos(self):
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM equipamentos
+        """)
+
+        return self.cursor.fetchone()[0]
+
+
+    def total_estoque(self):
+        self.cursor.execute("""
+            SELECT SUM(quantidade)
+            FROM equipamentos
+        """)
+
+        resultado = self.cursor.fetchone()[0]
+
+        if resultado is None:
+            return 0
+
+        return resultado
+
+
+    def total_retiradas(self):
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM movimentacoes
+            WHERE tipo = 'Retirada'
+        """)
+
+        return self.cursor.fetchone()[0]
+
+
+    def total_devolucoes(self):
+        self.cursor.execute("""
+            SELECT COUNT(*)
+            FROM movimentacoes
+            WHERE tipo = 'Devolução'
+        """)
+
+        return self.cursor.fetchone()[0]
+
+    def pesquisar_movimentacoes(self, termo):
+        self.cursor.execute("""
+            SELECT
+                data,
+                hora,
+                colaborador,
+                equipamento,
+                tipo,
+                quantidade
+            FROM movimentacoes
+            WHERE colaborador LIKE ?
+               OR equipamento LIKE ?
+               OR tipo LIKE ?
+               OR data LIKE ?
+            ORDER BY id DESC
+        """, (
+            f"%{termo}%",
+            f"%{termo}%",
+            f"%{termo}%",
+            f"%{termo}%"
+        ))
+
+        return self.cursor.fetchall()
