@@ -1,25 +1,42 @@
+from datetime import datetime
 import customtkinter as ctk
 from tkinter import messagebox
+
+from assets.theme.theme import *
 from database.database import Database
-from datetime import datetime
+from ui.components import BotaoSecundario, TituloPagina
+
+
+OPCAO_COLABORADOR = "Selecione o colaborador"
+OPCAO_EQUIPAMENTO = "Selecione o equipamento"
 
 
 class Estoque(ctk.CTkFrame):
-
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, fg_color=BACKGROUND)
 
         self.banco = Database()
+
         self.pack(fill="both", expand=True)
+        self.criar_interface()
 
-        titulo = ctk.CTkLabel(
+    def criar_interface(self):
+        TituloPagina(
             self,
-            text="Controle de Estoque",
-            font=("Arial", 28, "bold")
+            "Controle de Estoque",
+            "Registre retiradas e devoluções de equipamentos."
         )
-        titulo.pack(pady=(40, 20))
 
-        formulario = ctk.CTkFrame(self, width=600, height=320)
+        self.criar_formulario()
+
+    def criar_formulario(self):
+        formulario = ctk.CTkFrame(
+            self,
+            width=620,
+            height=380,
+            corner_radius=18,
+            fg_color=CARD
+        )
         formulario.pack(pady=20)
         formulario.pack_propagate(False)
 
@@ -27,19 +44,30 @@ class Estoque(ctk.CTkFrame):
             formulario,
             values=self.banco.nomes_colaboradores(),
             width=450,
-            height=40
+            height=40,
+            state="readonly"
         )
-        self.combo_colaborador.pack(pady=15)
-        self.combo_colaborador.set("Selecione o colaborador")
+        self.combo_colaborador.pack(pady=(35, 12))
+        self.combo_colaborador.set(OPCAO_COLABORADOR)
 
         self.combo_equipamento = ctk.CTkComboBox(
             formulario,
             values=self.banco.nomes_equipamentos(),
             width=450,
-            height=40
+            height=40,
+            state="readonly",
+            command=lambda valor: self.atualizar_estoque_atual()
         )
-        self.combo_equipamento.pack(pady=15)
-        self.combo_equipamento.set("Selecione o equipamento")
+        self.combo_equipamento.pack(pady=12)
+        self.combo_equipamento.set(OPCAO_EQUIPAMENTO)
+
+        self.label_estoque = ctk.CTkLabel(
+            formulario,
+            text="Estoque atual: -",
+            font=FONT_TEXT,
+            text_color=TEXT_SECONDARY
+        )
+        self.label_estoque.pack(pady=(0, 8))
 
         self.campo_quantidade = ctk.CTkEntry(
             formulario,
@@ -47,51 +75,65 @@ class Estoque(ctk.CTkFrame):
             width=450,
             height=40
         )
-        self.campo_quantidade.pack(pady=15)
+        self.campo_quantidade.pack(pady=12)
 
-        frame_botoes = ctk.CTkFrame(
-            formulario,
-            fg_color="transparent"
-        )
-        frame_botoes.pack(pady=20)
+        self.criar_botoes(formulario)
 
-        ctk.CTkButton(
+    def criar_botoes(self, master):
+        frame_botoes = ctk.CTkFrame(master, fg_color="transparent")
+        frame_botoes.pack(pady=18)
+
+        BotaoSecundario(
             frame_botoes,
-            text="📤 Retirar",
+            text="Retirar",
             width=180,
-            height=42,
-            font=("Arial", 14, "bold"),
             command=self.retirar
         ).pack(side="left", padx=10)
 
-        ctk.CTkButton(
+        BotaoSecundario(
             frame_botoes,
-            text="📥 Devolver",
+            text="Devolver",
             width=180,
-            height=42,
-            font=("Arial", 14, "bold"),
             command=self.devolver
         ).pack(side="left", padx=10)
 
-    def validar_campos(self):
-        colaborador = self.combo_colaborador.get()
+    def atualizar_estoque_atual(self):
         equipamento = self.combo_equipamento.get()
-        quantidade = self.campo_quantidade.get()
 
-        if colaborador == "Selecione o colaborador":
+        if equipamento == OPCAO_EQUIPAMENTO:
+            self.label_estoque.configure(text="Estoque atual: -")
+            return
+
+        quantidade = self.banco.buscar_quantidade_equipamento(equipamento)
+
+        if quantidade is None:
+            self.label_estoque.configure(text="Estoque atual: -")
+            return
+
+        self.label_estoque.configure(text=f"Estoque atual: {quantidade}")
+
+    def validar_campos(self):
+        colaborador = self.combo_colaborador.get().strip()
+        equipamento = self.combo_equipamento.get().strip()
+        quantidade = self.campo_quantidade.get().strip()
+
+        if colaborador == OPCAO_COLABORADOR:
             messagebox.showwarning("Atenção", "Selecione um colaborador.")
             return None
 
-        if equipamento == "Selecione o equipamento":
+        if equipamento == OPCAO_EQUIPAMENTO:
             messagebox.showwarning("Atenção", "Selecione um equipamento.")
             return None
 
-        if quantidade == "":
+        if not quantidade:
             messagebox.showwarning("Atenção", "Informe a quantidade.")
             return None
 
-        if not quantidade.isdigit():
-            messagebox.showwarning("Atenção", "A quantidade deve conter apenas números.")
+        if not quantidade.isdigit() or int(quantidade) <= 0:
+            messagebox.showwarning(
+                "Atenção",
+                "A quantidade deve ser um número maior que zero."
+            )
             return None
 
         return colaborador, equipamento, int(quantidade)
@@ -117,10 +159,7 @@ class Estoque(ctk.CTkFrame):
             return
 
         colaborador, equipamento, quantidade = dados
-
-        quantidade_atual = self.banco.buscar_quantidade_equipamento(
-            equipamento
-        )
+        quantidade_atual = self.banco.buscar_quantidade_equipamento(equipamento)
 
         if quantidade_atual is None:
             messagebox.showerror("Erro", "Equipamento não encontrado.")
@@ -135,10 +174,7 @@ class Estoque(ctk.CTkFrame):
 
         nova_quantidade = quantidade_atual - quantidade
 
-        self.banco.alterar_quantidade(
-            equipamento,
-            nova_quantidade
-        )
+        self.banco.alterar_quantidade(equipamento, nova_quantidade)
 
         self.registrar_movimentacao(
             colaborador,
@@ -152,7 +188,7 @@ class Estoque(ctk.CTkFrame):
             f"Retirada realizada!\n\nNovo estoque: {nova_quantidade}"
         )
 
-        self.campo_quantidade.delete(0, "end")
+        self.finalizar_movimentacao()
 
     def devolver(self):
         dados = self.validar_campos()
@@ -161,10 +197,7 @@ class Estoque(ctk.CTkFrame):
             return
 
         colaborador, equipamento, quantidade = dados
-
-        quantidade_atual = self.banco.buscar_quantidade_equipamento(
-            equipamento
-        )
+        quantidade_atual = self.banco.buscar_quantidade_equipamento(equipamento)
 
         if quantidade_atual is None:
             messagebox.showerror("Erro", "Equipamento não encontrado.")
@@ -172,10 +205,7 @@ class Estoque(ctk.CTkFrame):
 
         nova_quantidade = quantidade_atual + quantidade
 
-        self.banco.alterar_quantidade(
-            equipamento,
-            nova_quantidade
-        )
+        self.banco.alterar_quantidade(equipamento, nova_quantidade)
 
         self.registrar_movimentacao(
             colaborador,
@@ -189,4 +219,8 @@ class Estoque(ctk.CTkFrame):
             f"Devolução realizada!\n\nNovo estoque: {nova_quantidade}"
         )
 
+        self.finalizar_movimentacao()
+
+    def finalizar_movimentacao(self):
         self.campo_quantidade.delete(0, "end")
+        self.atualizar_estoque_atual()

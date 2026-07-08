@@ -1,33 +1,57 @@
 import customtkinter as ctk
+from tkinter import messagebox
+from tkinter import simpledialog
 from tkinter import ttk
+
+from assets.theme.theme import *
 from database.database import Database
+from ui.components import BotaoPerigo, TituloPagina
+
+
+SENHA_LIMPAR_HISTORICO = "admin123"
 
 
 class Historico(ctk.CTkFrame):
-
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, fg_color=BACKGROUND)
 
         self.banco = Database()
 
         self.pack(fill="both", expand=True)
+        self.criar_interface()
+        self.atualizar_lista()
 
-        titulo = ctk.CTkLabel(
+    def criar_interface(self):
+        TituloPagina(
             self,
-            text="Histórico de Movimentações",
-            font=("Arial", 28, "bold")
+            "Histórico de Movimentações",
+            "Consulte retiradas e devoluções registradas no sistema."
         )
-        titulo.pack(pady=(40, 20))
+
+        self.criar_barra_acoes()
+        self.criar_tabela()
+
+    def criar_barra_acoes(self):
+        barra = ctk.CTkFrame(self, fg_color="transparent")
+        barra.pack(pady=(10, 5))
 
         self.campo_pesquisa = ctk.CTkEntry(
-            self,
+            barra,
             placeholder_text="Pesquisar por colaborador, equipamento, tipo ou data...",
-            width=850,
+            width=680,
             height=40
         )
-        self.campo_pesquisa.pack(pady=(10, 5))
+        self.campo_pesquisa.pack(side="left", padx=(0, 10))
         self.campo_pesquisa.bind("<KeyRelease>", self.pesquisar)
 
+        BotaoPerigo(
+            barra,
+            text="🗑 Limpar Histórico",
+            width=170,
+            command=self.confirmar_limpeza_historico
+        ).pack(side="left")
+
+    def criar_tabela(self):
         self.tabela = ttk.Treeview(
             self,
             columns=(
@@ -42,48 +66,74 @@ class Historico(ctk.CTkFrame):
             height=18
         )
 
-        self.tabela.heading("data", text="Data")
-        self.tabela.heading("hora", text="Hora")
-        self.tabela.heading("colaborador", text="Colaborador")
-        self.tabela.heading("equipamento", text="Equipamento")
-        self.tabela.heading("tipo", text="Tipo")
-        self.tabela.heading("quantidade", text="Qtd")
+        colunas = {
+            "data": ("Data", 110, "center"),
+            "hora": ("Hora", 100, "center"),
+            "colaborador": ("Colaborador", 230, "w"),
+            "equipamento": ("Equipamento", 230, "w"),
+            "tipo": ("Tipo", 120, "center"),
+            "quantidade": ("Qtd", 80, "center"),
+        }
 
-        self.tabela.column("data", width=110, anchor="center")
-        self.tabela.column("hora", width=100, anchor="center")
-        self.tabela.column("colaborador", width=220)
-        self.tabela.column("equipamento", width=220)
-        self.tabela.column("tipo", width=120, anchor="center")
-        self.tabela.column("quantidade", width=80, anchor="center")
+        for coluna, (titulo, largura, alinhamento) in colunas.items():
+            self.tabela.heading(coluna, text=titulo)
+            self.tabela.column(coluna, width=largura, anchor=alinhamento)
 
         self.tabela.pack(pady=20)
 
-        self.atualizar_lista()
-
     def atualizar_lista(self):
-        for item in self.tabela.get_children():
-            self.tabela.delete(item)
-
         movimentacoes = self.banco.listar_movimentacoes()
+        self.preencher_tabela(movimentacoes)
 
-        for movimentacao in movimentacoes:
-            self.tabela.insert(
-                "",
-                "end",
-                values=movimentacao
-            )
-
-    def pesquisar(self, evento):
-        termo = self.campo_pesquisa.get()
-
-        for item in self.tabela.get_children():
-            self.tabela.delete(item)
-
+    def pesquisar(self, evento=None):
+        termo = self.campo_pesquisa.get().strip()
         movimentacoes = self.banco.pesquisar_movimentacoes(termo)
 
+        self.preencher_tabela(movimentacoes)
+
+    def preencher_tabela(self, movimentacoes):
+        for item in self.tabela.get_children():
+            self.tabela.delete(item)
+
         for movimentacao in movimentacoes:
-            self.tabela.insert(
-                "",
-                "end",
-                values=movimentacao
+            self.tabela.insert("", "end", values=movimentacao)
+
+    def confirmar_limpeza_historico(self):
+        if not self.banco.listar_movimentacoes():
+            messagebox.showinfo(
+                "Histórico vazio",
+                "Não existem movimentações para limpar."
             )
+            return
+
+        confirmar = messagebox.askyesno(
+            "Limpar histórico",
+            "Deseja realmente apagar todo o histórico de movimentações?"
+        )
+
+        if not confirmar:
+            return
+
+        senha = simpledialog.askstring(
+            "Confirmação",
+            "Digite a senha para limpar o histórico:",
+            show="*"
+        )
+
+        if senha is None:
+            return
+
+        if senha != SENHA_LIMPAR_HISTORICO:
+            messagebox.showerror(
+                "Senha incorreta",
+                "A senha informada está incorreta."
+            )
+            return
+
+        self.banco.limpar_movimentacoes()
+        self.atualizar_lista()
+
+        messagebox.showinfo(
+            "Sucesso",
+            "Histórico limpo com sucesso."
+        )
